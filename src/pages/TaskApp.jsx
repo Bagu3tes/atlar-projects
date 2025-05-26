@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import styles from '../styles/TaskApp.css'; 
+import '../styles/TaskApp.css'; 
 
 function TaskApp() {
   const [tasks, setTasks] = useState([]);
