@@ -1,11 +1,11 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import TaskApp from './pages/TaskApp';
+import WeatherApi from './pages/WeatherApi';
 
 function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<TaskApp />} />
+        <Route path="/" element={<WeatherApi />} />
       </Routes>
     </Router>
   );
