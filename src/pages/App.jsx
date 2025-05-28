@@ -1,10 +1,7 @@
-import rainy from '../assets/images/rainy.png'
-import cloudy from '../assets/images/cloudy.png'
-import sunny from '../assets/images/sunny.png'
-import snowy from '../assets/images/snowy.png'
 import { useState } from 'react'
+import '../styles/App.css'
 
-const WeatherApi = () => {
+const App = () => {
   const [data, setData] = useState({})
   const [location, setLocation] = useState("")
   const api_key = '9297720310e64d37fa054b802c765225'
@@ -24,23 +21,12 @@ const WeatherApi = () => {
     }
   }
 
-   const weatherimages = {
-  Clear: sunny,
-  Clouds: cloudy,
-  Rain: rainy,
-  Snow: snowy,
-  Haze: cloudy,
-  Mist: cloudy,
-  }
-
-  const weatherImage = data.weather ? weatherimages[data.weather[0].main] : null
-
   return <div className="container">
     <div className="weather-app">
 
       <div className="search">
         <input type="text"
-          placeholder='Enter Location'
+          placeholder='Enter Recipe'
           value={location}
           onChange={handleInputChange}
         />
@@ -50,7 +36,6 @@ const WeatherApi = () => {
             <div className="humidity">{data.main ? data.main.humidity : null}%
               <div className="wind">{data.wind ? data.wind.speed : null}km/h
               <br />
-              <img src={weatherImage} alt="sunny" />
               </div>
             </div>
           </div>
@@ -60,4 +45,4 @@ const WeatherApi = () => {
   </div>
 }
 
-export default WeatherApi;
+export default App;

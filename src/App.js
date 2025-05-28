@@ -1,11 +1,11 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import WeatherApi from './pages/WeatherApi';
+import Api from './pages/App';
 
 function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<WeatherApi />} />
+        <Route path="/" element={<Api />} />
       </Routes>
     </Router>
   );
