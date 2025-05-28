@@ -1,48 +1,96 @@
-import { useState } from 'react'
-import '../styles/App.css'
+import { useState } from 'react';
 
 const App = () => {
-  const [data, setData] = useState({})
-  const [location, setLocation] = useState("")
-  const api_key = '9297720310e64d37fa054b802c765225'
+  const [query, setQuery] = useState('');
+  const [recipes, setRecipes] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
 
-  const handleInputChange = (e) => {
-    setLocation(e.target.value)
-  }
+  const API_KEY = '337a69af9d21459fa429d498d3a94fbc';
+  const BASE_URL = 'https://api.spoonacular.com/recipes';
 
-  const search = async () => {
-    if (location.trim() !== "") {
-      const url =
-        `https://api.openweathermap.org/data/2.5/weather?q=${location}&units=Metric&appid=${api_key}`
-      const res = await fetch(url)
-      const searchData = await res.json()
-      console.log(searchData)
-      setData(searchData)
+  const searchRecipes = async () => {
+    if (!query.trim()) return;
+
+    setIsLoading(true);
+    setError(null);
+    setRecipes([]);
+
+    try {
+      // Search for recipes with details included
+      const url = `${BASE_URL}/complexSearch?query=${encodeURIComponent(query)}&number=5&addRecipeInformation=true&apiKey=${API_KEY}`;
+      const response = await fetch(url);
+
+      if (!response.ok) throw new Error(`API request failed with status ${response.status}`);
+
+      const data = await response.json();
+
+      // Filter out duplicate recipes
+      const uniqueRecipes = data.results?.filter((recipe, index, self) =>
+        index === self.findIndex(r => r.id === recipe.id)
+      ) || [];
+
+      setRecipes(uniqueRecipes);
+      console.log("Found recipes:", uniqueRecipes);
+
+    } catch (err) {
+      setError(err.message);
+      console.error('Error:', err);
+    } finally {
+      setIsLoading(false);
     }
-  }
+  };
 
-  return <div className="container">
-    <div className="weather-app">
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    searchRecipes();
+  };
 
-      <div className="search">
-        <input type="text"
-          placeholder='Enter Recipe'
-          value={location}
-          onChange={handleInputChange}
+  return (
+    <div>
+      <h1>Recipe Finder</h1>
+
+      <form onSubmit={handleSubmit}>
+        <input
+          type="text"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Search by recipe name or ingredients"
         />
-        <button onClick={search}>Search</button>
-        <div className='weather-type'>{data.weather ? data.weather[0].main : null}
-          <div className='temp'>{data.main ? `${Math.floor(data.main.temp)}ºC` : null}
-            <div className="humidity">{data.main ? data.main.humidity : null}%
-              <div className="wind">{data.wind ? data.wind.speed : null}km/h
-              <br />
-              </div>
+        <button type="submit" disabled={isLoading}>
+          {isLoading ? 'Searching...' : 'Search'}
+        </button>
+      </form>
+
+      {error && <div>Error: {error}</div>}
+
+      {isLoading ? (
+        <div>Loading recipes...</div>
+      ) : (
+        <div>
+          {recipes.length > 0 ? (
+            <div>
+              <h2>Found {recipes.length} recipes</h2>
+              {recipes.map((recipe) => (
+                <div key={`${recipe.id}-${recipe.title}`} style={{ marginBottom: '20px' }}>
+                  <h3>{recipe.title}</h3>
+                  {recipe.image && (
+                    <img src={recipe.image} alt={recipe.title} width="200" />
+                  )}
+                  {recipe.summary && (
+                    <div dangerouslySetInnerHTML={{ __html: recipe.summary }} />
+                  )}
+                  <hr />
+                </div>
+              ))}
             </div>
-          </div>
+          ) : (
+            query && !isLoading && <div>No recipes found. Try a different search.</div>
+          )}
         </div>
-      </div>
+      )}
     </div>
-  </div>
-}
+  );
+};
 
 export default App;
