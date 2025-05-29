@@ -1,137 +1,91 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import '../styles/App.css';
 
-const NotesApp = () => {
-  const [notes, setNotes] = useState(() => JSON.parse(localStorage.getItem('notes')) || []);
-  const [title, setTitle] = useState('');
-  const [content, setContent] = useState('');
-  const [editId, setEditId] = useState(null);
-  const [searchTerm, setSearchTerm] = useState('');
+const TicTacToe = () => {
+  const [board, setBoard] = useState(Array(9).fill(null));
+  const [isXTurn, setIsXTurn] = useState(true);
+  const [winner, setWinner] = useState(null);
 
-  useEffect(() => {
-    localStorage.setItem('notes', JSON.stringify(notes));
-  }, [notes]);
+  //padroes possiveis
+  const checkWinner = (currentBoard) => {
+    const winPatterns = [
+      [0, 1, 2], 
+      [3, 4, 5], 
+      [6, 7, 8], 
+      [0, 3, 6], 
+      [1, 4, 7], 
+      [2, 5, 8],
+      [0, 4, 8], 
+      [2, 4, 6]  
+    ];
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (!title.trim()) return;
+    // verifica o jogo a cada jogada
+    for (const pattern of winPatterns) {
+      const [a, b, c] = pattern;
+      if (
+        currentBoard[a] &&
+        currentBoard[a] === currentBoard[b] &&
+        currentBoard[a] === currentBoard[c]
+      ) {
+        return currentBoard[a]; // Return 'X' or 'O' as the winner
+      }
+    }
 
-    const noteData = {
-      id: editId || Date.now(),
-      title,
-      content,
-      createdAt: editId ? notes.find(n => n.id === editId).createdAt : new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    };
+    // Check for a draw
+    if (currentBoard.every(cell => cell !== null)) {
+      return 'Draw';
+    }
 
-    setNotes(editId 
-      ? notes.map(note => note.id === editId ? noteData : note)
-      : [noteData, ...notes]
-    );
-
-    setTitle('');
-    setContent('');
-    setEditId(null);
+    return null;
   };
 
-  const filteredNotes = notes
-    .filter(note => 
-      note.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
-      note.content.toLowerCase().includes(searchTerm.toLowerCase())
-    )
-    .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+  const handleClick = (index) => {
+    if (board[index] || winner) return; 
+
+    const newBoard = [...board];
+    newBoard[index] = isXTurn ? 'X' : 'O';
+    setBoard(newBoard);
+    setIsXTurn(!isXTurn);
+
+    const result = checkWinner(newBoard);
+    if (result) {
+      setWinner(result);
+    }
+  };
+
+  const handleReset = () => {
+    setBoard(Array(9).fill(null));
+    setIsXTurn(true);
+    setWinner(null);
+  };
+
+  const renderCell = (index) => (
+    <button
+      className="tic-tac-toe-cell"
+      onClick={() => handleClick(index)}
+    >
+      {board[index]}
+    </button>
+  );
 
   return (
-    <div className="notes-app-container">
-      <h1 className="notes-app-header">Notes App</h1>
-
-      <div className="notes-app-controls">
-        <input
-          type="text"
-          placeholder="Search notes..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="notes-app-search"
-        />
+    <div className="tic-tac-toe-container">
+      <h1 className="tic-tac-toe-header">Tic-Tac-Toe</h1>
+      <div className="tic-tac-toe-status">
+        {winner
+          ? winner === 'Draw'
+            ? 'Game is a Draw!'
+            : `Winner: ${winner}`
+          : `Turn: ${isXTurn ? 'X' : 'O'}`}
       </div>
-
-      <form onSubmit={handleSubmit} className="notes-app-form">
-        <input
-          type="text"
-          placeholder="Note title"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          className="notes-app-title"
-          required
-        />
-        <textarea
-          placeholder="Note content"
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-          className="notes-app-content"
-        />
-        
-        <div className="notes-app-buttons">
-          <button type="submit" className="notes-app-submit">
-            {editId ? 'Update Note' : 'Add Note'}
-          </button>
-          {editId && (
-            <button 
-              type="button" 
-              onClick={() => { setEditId(null); setTitle(''); setContent(''); }}
-              className="notes-app-cancel"
-            >
-              Cancel
-            </button>
-          )}
-        </div>
-      </form>
-
-      <div className="notes-app-list">
-        <h2 className="notes-app-list-header">
-          {filteredNotes.length} {filteredNotes.length === 1 ? 'Note' : 'Notes'}
-        </h2>
-        
-        {filteredNotes.length === 0 ? (
-          <p className="notes-app-empty">No notes found. Create your first note!</p>
-        ) : (
-          <div className="notes-app-notes">
-            {filteredNotes.map(note => (
-              <div 
-                key={note.id}
-                className={`notes-app-note ${editId === note.id ? 'notes-app-note-editing' : ''}`}
-              >
-                <div>
-                  <h3 className="notes-app-note-title">{note.title}</h3>
-                  <p className="notes-app-note-content">{note.content}</p>
-                  <div className="notes-app-note-dates">
-                    <span>Created: {new Date(note.createdAt).toLocaleString()}</span>
-                    {note.createdAt !== note.updatedAt && (
-                      <span> | Updated: {new Date(note.updatedAt).toLocaleString()}</span>
-                    )}
-                  </div>
-                </div>
-                <div className="notes-app-note-actions">
-                  <button 
-                    onClick={() => { setEditId(note.id); setTitle(note.title); setContent(note.content); }}
-                    className="notes-app-edit"
-                  >
-                    Edit
-                  </button>
-                  <button 
-                    onClick={() => setNotes(notes.filter(n => n.id !== note.id))}
-                    className="notes-app-delete"
-                  >
-                    Delete
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
+      <div className="tic-tac-toe-board">
+        {board.map((_, index) => renderCell(index))}
       </div>
+      <button className="tic-tac-toe-reset" onClick={handleReset}>
+        Reset Game
+      </button>
     </div>
   );
 };
 
-export default NotesApp;
+export default TicTacToe;
