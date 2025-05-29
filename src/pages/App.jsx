@@ -1,94 +1,186 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const App = () => {
-  const [query, setQuery] = useState('');
-  const [recipes, setRecipes] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [isLogin, setIsLogin] = useState(true); // filtra o formulário 
+  const [loginData, setLoginData] = useState({ email: '', password: '' });
+  const [signupData, setSignupData] = useState({ email: '', password: '' });
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
-  const API_KEY = '337a69af9d21459fa429d498d3a94fbc';
-  const BASE_URL = 'https://api.spoonacular.com/recipes';
+  // localStorage
+  const [usersDb, setUsersDb] = useState(() => {
+    const savedUsers = localStorage.getItem('users');
+    return savedUsers ? JSON.parse(savedUsers) : [];
+  });
 
-  const searchRecipes = async () => {
-    if (!query.trim()) return;
+  // Usuário logado
+  const [currentUser, setCurrentUser] = useState(() => {
+    const savedUser = localStorage.getItem('currentUser');
+    return savedUser ? JSON.parse(savedUser) : null;
+  });
 
-    setIsLoading(true);
-    setError(null);
-    setRecipes([]);
+  // Função hash de password simples, se fosse database usava bcrypt
+  const simpleHash = (str) => {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+      const char = str.charCodeAt(i);
+      hash = (hash << 5) - hash + char;
+      hash |= 0; // Conversão para 32bit integer
+    }
+    return hash.toString();
+  };
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
 
     try {
-      // Search for recipes with details included
-      const url = `${BASE_URL}/complexSearch?query=${encodeURIComponent(query)}&number=5&addRecipeInformation=true&apiKey=${API_KEY}`;
-      const response = await fetch(url);
+      const user = usersDb.find(
+        u => u.email === loginData.email &&
+        u.password === simpleHash(loginData.password)
+      );
 
-      if (!response.ok) throw new Error(`API request failed with status ${response.status}`);
+      if (!user) {
+        throw new Error('Email ou senha incorretos');
+      }
 
-      const data = await response.json();
+      setCurrentUser({ email: user.email });
+      localStorage.setItem('currentUser', JSON.stringify({
+        email: user.email
+      }));
 
-      // Filter out duplicate recipes
-      const uniqueRecipes = data.results?.filter((recipe, index, self) =>
-        index === self.findIndex(r => r.id === recipe.id)
-      ) || [];
-
-      setRecipes(uniqueRecipes);
-      console.log("Found recipes:", uniqueRecipes);
-
+      navigate('/');
     } catch (err) {
       setError(err.message);
-      console.error('Error:', err);
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSignup = async (e) => {
     e.preventDefault();
-    searchRecipes();
+    setError('');
+    setLoading(true);
+
+    try {
+      if (!signupData.email || !signupData.password) {
+        throw new Error('Preencha todos os campos');
+      }
+
+      if (usersDb.some(u => u.email === signupData.email)) {
+        throw new Error('Email já cadastrado');
+      }
+
+      if (signupData.password.length < 6) {
+        throw new Error('Senha deve ter pelo menos 6 caracteres');
+      }
+
+      const newUser = {
+        email: signupData.email,
+        password: simpleHash(signupData.password)
+      };
+
+      const updatedUsers = [...usersDb, newUser];
+      setUsersDb(updatedUsers);
+      localStorage.setItem('users', JSON.stringify(updatedUsers));
+
+      navigate('/');
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
+
+  const handleLogout = () => {
+    setCurrentUser(null);
+    localStorage.removeItem('currentUser');
+    navigate('/auth');
+  };
+
+  if (currentUser) {
+    return (
+      <div>
+        <h2>Bem-vindo!</h2>
+        <p>Email: {currentUser.email}</p>
+        <button onClick={handleLogout}>Logout</button>
+      </div>
+    );
+  }
 
   return (
     <div>
-      <h1>Recipe Finder</h1>
-
-      <form onSubmit={handleSubmit}>
-        <input
-          type="text"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search by recipe name or ingredients"
-        />
-        <button type="submit" disabled={isLoading}>
-          {isLoading ? 'Searching...' : 'Search'}
-        </button>
-      </form>
-
-      {error && <div>Error: {error}</div>}
-
-      {isLoading ? (
-        <div>Loading recipes...</div>
-      ) : (
-        <div>
-          {recipes.length > 0 ? (
-            <div>
-              <h2>Found {recipes.length} recipes</h2>
-              {recipes.map((recipe) => (
-                <div key={`${recipe.id}-${recipe.title}`} style={{ marginBottom: '20px' }}>
-                  <h3>{recipe.title}</h3>
-                  {recipe.image && (
-                    <img src={recipe.image} alt={recipe.title} width="200" />
-                  )}
-                  {recipe.summary && (
-                    <div dangerouslySetInnerHTML={{ __html: recipe.summary }} />
-                  )}
-                  <hr />
-                </div>
-              ))}
-            </div>
-          ) : (
-            query && !isLoading && <div>No recipes found. Try a different search.</div>
-          )}
-        </div>
+      <h2>{isLogin ? 'Login' : 'Registro'}</h2>
+      
+      {error && <p style={{ color: 'red' }}>{error}</p>}
+      
+      {isLogin && (
+        <form onSubmit={handleLogin}>
+          <div>
+            <label>Email:</label>
+            <input
+              type="email"
+              name="email"
+              value={loginData.email}
+              onChange={(e) => setLoginData({...loginData, email: e.target.value})}
+              required
+            />
+          </div>
+          <div>
+            <label>Senha:</label>
+            <input
+              type="password"
+              name="password"
+              value={loginData.password}
+              onChange={(e) => setLoginData({...loginData, password: e.target.value})}
+              required
+            />
+          </div>
+          <button type="submit" disabled={loading}>
+            {loading ? 'Processando...' : 'Entrar'}
+          </button>
+        </form>
       )}
+      
+      {!isLogin && (
+        <form onSubmit={handleSignup}>
+          <div>
+            <label>Email:</label>
+            <input
+              type="email"
+              name="email"
+              value={signupData.email}
+              onChange={(e) => setSignupData({...signupData, email: e.target.value})}
+              required
+            />
+          </div>
+          <div>
+            <label>Senha:</label>
+            <input
+              type="password"
+              name="password"
+              value={signupData.password}
+              onChange={(e) => setSignupData({...signupData, password: e.target.value})}
+              required
+              minLength={6}
+            />
+          </div>
+          <button type="submit" disabled={loading}>
+            {loading ? 'Processando...' : 'Registrar'}
+          </button>
+        </form>
+      )}
+      
+      <button
+        type="button"
+        onClick={() => setIsLogin(!isLogin)}
+        disabled={loading}
+      >
+        {isLogin ? 'Fazer Registro' : 'Fazer Login'}
+      </button>
     </div>
   );
 };
