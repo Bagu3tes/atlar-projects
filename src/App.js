@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import TaskApp from './pages/TaskApp';
+import TaskApp from './pages/App';
 
 function App() {
   return (

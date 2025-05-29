@@ -1,0 +1,154 @@
+.notes-app-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 16px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.notes-app-header {
+  color: #333;
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.notes-app-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.notes-app-search {
+  padding: 8px;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  flex-grow: 1;
+  min-width: 200px;
+}
+
+.notes-app-form {
+  background-color: white;
+  padding: 16px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.notes-app-title {
+  width: 100%;
+  font-size: 16px;
+  margin-bottom: 8px;
+  padding: 8px;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+}
+
+.notes-app-content {
+  width: 100%;
+  min-height: 100px;
+  font-size: 16px;
+  resize: vertical;
+  margin-bottom: 8px;
+  padding: 8px;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+}
+
+.notes-app-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.notes-app-submit,
+.notes-app-cancel,
+.notes-app-edit,
+.notes-app-delete {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.notes-app-submit {
+  background-color: #10b981;
+  color: white;
+}
+
+.notes-app-cancel {
+  background-color: #ef4444;
+  color: white;
+}
+
+.notes-app-list {
+  background-color: white;
+  padding: 16px;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.notes-app-list-header {
+  color: #333;
+  margin-top: 0;
+}
+
+.notes-app-empty {
+  text-align: center;
+  color: #6b7280;
+  font-style: italic;
+}
+
+.notes-app-notes {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.notes-app-note {
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 12px;
+  display: flex;
+  justify-content: space-between;
+  transition: all 0.2s;
+}
+
+.notes-app-note-editing {
+  border: 2px solid #3b82f6;
+  background-color: #eff6ff;
+}
+
+.notes-app-note-title {
+  margin-top: 0;
+  margin-bottom: 8px;
+  color: #333;
+}
+
+.notes-app-note-content {
+  margin: 0;
+  color: #4b5563;
+  white-space: pre-wrap;
+}
+
+.notes-app-note-dates {
+  color: #6b7280;
+  font-size: 12px;
+}
+
+.notes-app-note-actions {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+.notes-app-edit {
+  background-color: #3b82f6;
+  color: white;
+}
+
+.notes-app-delete {
+  background-color: #ef4444;
+  color: white;
+}
