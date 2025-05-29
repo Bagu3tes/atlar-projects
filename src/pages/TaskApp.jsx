@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import '../styles/TaskApp.css'; 
+import '../styles/page.css'; 
 
 function TaskApp() {
   const [tasks, setTasks] = useState([]);
@@ -63,7 +63,7 @@ function TaskApp() {
 
   return (
     <div className="container">
-  <h1 className="header">Minha Lista de Tarefas</h1>
+  <h1 className="header">Notas</h1>
 
   <div className="form">
     <input
