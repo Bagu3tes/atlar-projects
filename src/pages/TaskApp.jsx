@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import '../styles/page.css'; 
+import WeatherWidget from '../components/weatherWidget.jsx';
 
 function TaskApp() {
   const [tasks, setTasks] = useState([]);
@@ -63,7 +64,8 @@ function TaskApp() {
 
   return (
     <div className="container">
-  <h1 className="header">Notas</h1>
+  <h1 className="header">My To Do</h1>
+   <WeatherWidget />
 
   <div className="form">
     <input
